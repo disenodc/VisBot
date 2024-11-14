@@ -1,0 +1,10 @@
+streamlit
+pandas
+numpy
+seaborn
+plotly
+scikit-learn
+requests
+openai
+panel==0.13.1
+
