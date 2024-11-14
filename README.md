@@ -1,7 +1,7 @@
-![Logo visbot](https://raw.githubusercontent.com/disenodc/visbot/main/bot_1.png)
+![Logo visbot](https://raw.githubusercontent.com/disenodc/VisBot/refs/heads/main/bot_1.png)
 # VisBot - Visualization Recommender with iA
 
-- Visitar: [Sitio Web](https://visbot.streamlit.app/) / [LICENCIA](https://github.com/disenodc/visbot/blob/main/LICENSE)
+- Visitar: [Sitio Web](https://visbot.streamlit.app/) / [LICENCIA](https://github.com/disenodc/VisBot/blob/main/LICENSE)
 - Author: BCCs. Luis Dario Ceballos. (2024). *VisBot - Visualization Recommender with iA*. 
 - PhD in Computer Science. UAI (Inter-American Open University), Buenos Aires-Argentina.
    CESIMAR - CENPAT - CONICET. Puerto Madryn, Chubut, Argentina, (U9120).

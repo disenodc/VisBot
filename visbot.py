@@ -13,7 +13,7 @@ client = OpenAI(
 
 st.set_page_config(
     page_title="VisBot - Visualization Recommender with AI",
-    page_icon="https://raw.githubusercontent.com/disenodc/visbot/main/bot_2.ico",
+    page_icon="https://raw.githubusercontent.com/disenodc/VisBot/refs/heads/main/bot_2.ico",
 )
 
 # Function to read data from a file or URL
