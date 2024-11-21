@@ -150,7 +150,7 @@ def main():
     api_key = openai.api_key
     
     # Input for URL
-    url_input = st.text_input("Enter the URL of the data file")
+    #url_input = st.text_input("Enter the URL of the data file")
     
     # Input to upload a local file
     uploaded_file = st.file_uploader("Load your CSV, XLSX or JSON file", type=["csv", "xlsx", "json"])
@@ -159,12 +159,7 @@ def main():
 
     # Leer el archivo o URL
     
-    if url_input:
-        try:
-            df = read_data(url_input)
-        except ValueError as e:
-            st.error(f"Error when processing data from URL: {e}")
-    elif uploaded_file is not None:
+    if uploaded_file is not None:
         try:
             df = read_data(uploaded_file)
         except ValueError as e:
