@@ -12,37 +12,43 @@ client = OpenAI(
 )
 
 st.set_page_config(
-    page_title="VisBot - Visualization Recommender with AI",
+    page_title="VisBot - Visualization Recommender powered with Ai",
     page_icon="https://raw.githubusercontent.com/disenodc/VisBot/refs/heads/main/bot_2.ico",
 )
 
-# Function to read data from a file or URL
-def read_data(file_path_or_url):
-    if isinstance(file_path_or_url, str) and file_path_or_url.startswith('http'):
-        response = requests.get(file_path_or_url)
-        content_type = response.headers.get('Content-Type')
-        if 'application/json' in content_type:
-            df = pd.read_json(response.content)
-        elif 'text/csv' in content_type:
-            first_line = response.text.splitlines()[0]
-            delimiter = ';' if ';' in first_line else ','
-            df = pd.read_csv(file_path_or_url, delimiter=delimiter)
-        elif 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' in content_type:
-            df = pd.read_excel(file_path_or_url)
+# Function to read data from a file
+def read_data(file_path):
+    if file_path.name.endswith('.csv'):
+        first_line = file_path.readline().decode('utf-8')
+        file_path.seek(0)
+        
+        if '\t' in first_line:
+            delimiter = '\t'
+        elif ';' in first_line:
+            delimiter = ';'
         else:
-            raise ValueError("File format not supported or content could not be identified.")
+            delimiter = ','
+            
+        df = pd.read_csv(file_path, delimiter=delimiter)
+    elif file_path.name.endswith('.txt'):
+        first_line = file_path.readline().decode('utf-8')
+        file_path.seek(0)
+        
+        if '\t' in first_line:
+            delimiter = '\t'
+        elif ';' in first_line:
+            delimiter = ';'
+        else:
+            delimiter = ','
+            
+        df = pd.read_csv(file_path, delimiter=delimiter)
+    elif file_path.name.endswith('.xlsx'):
+        df = pd.read_excel(file_path)
+    elif file_path.name.endswith('.json'):
+        df = pd.read_json(file_path)
     else:
-        if file_path_or_url.name.endswith('.csv'):
-            first_line = file_path_or_url.readline().decode('utf-8')
-            file_path_or_url.seek(0)
-            delimiter = ';' if ';' in first_line else ','
-            df = pd.read_csv(file_path_or_url, delimiter=delimiter)
-        elif file_path_or_url.name.endswith('.xlsx'):
-            df = pd.read_excel(file_path_or_url)
-        elif file_path_or_url.name.endswith('.json'):
-            df = pd.read_json(file_path_or_url)
-        else:
-            raise ValueError("Unsupported file format.")
+        raise ValueError("Unsupported file format.")
+    
     return df
 
 # Función para obtener recomendaciones de visualización de OpenAI utilizando GPT-4
@@ -62,8 +68,10 @@ def get_openai_recommendation(df):
     response = client.chat.completions.create(
         model= "gpt-4-turbo",  # Cambiamos a gpt-4 o gpt-4-turbo
         messages=[
-            {"role": "system", "content": "You are an expert assistant in data analysis specialized in visualization."},
-            {"role": "user", "content": f"I have a data set. {description} What type of visualizations would you recommend from this data? Describe and if possible recommend options"}
+            {"role": "system",
+            "content": "You are an expert assistant in data analysis specialized in visualization."},
+            {"role": "user",
+            "content": f"I have a data set. {description} What type of visualizations would you recommend from this data? Describe and if possible recommend options"}
         ],
         max_tokens=500  # Increase tokens if more context is desired
     )
@@ -138,13 +146,31 @@ def generate_plot(df, chart_type, x_axis=None, y_axis=None, z_axis=None, hist_bi
          fig = px.choropleth(df, locations=x_axis, color=y_axis, title=f'Choropleth map from {x_axis} and {y_axis}')
     elif chart_type == "Sun diagram":
          fig = px.sunburst(df, path=[x_axis], title=f'Sun diagram from {x_AXIS} and {y_AXIS}')
+    elif chart_type == "Time Series Plot":
+        fig = px.line(df, x=x_axis, y=y_axis, title=f'Time Series Plot from {x_axis} vs {y_axis}')
+    elif chart_type == "Treemap":
+        fig = px.treemap(df, path=[x_axis], values=y_axis, title=f'Treemap from {x_axis} with values {y_axis}')
+    
     
     return fig
 
 # Main function to run the Streamlit app
 def main():
+
+    # Encabezado con logo y título
+    logo_url = "https://raw.githubusercontent.com/disenodc/VisBot/refs/heads/main/bot_1.png"  # Cambia por la URL de tu logo o archivo local
+    st.markdown(
+        f"""
+        <div style="display: flex; align-items: start; gap: 5px;">
+        <img src="{logo_url}" alt="Logo" style="width: 5em; height: 5em;">
+        <h1 style="margin: 0;">VisBot</h1>
+        </div>
+        """,
+    unsafe_allow_html=True
+)
+
     # User interface with Streamlit
-    st.title("VisBot - TEST - Visualization Recommender with AI")
+    st.title("Visualization Recommender powered with Ai")
     
     # Input for OpenAI API key
     api_key = openai.api_key
@@ -153,7 +179,7 @@ def main():
     #url_input = st.text_input("Enter the URL of the data file")
     
     # Input to upload a local file
-    uploaded_file = st.file_uploader("Load your CSV, XLSX or JSON file", type=["csv", "xlsx", "json"])
+    uploaded_file = st.file_uploader("Here, Load your CSV, JSON, TXT OR XLSX file", type=["csv", "json", "txt", "xlsx"])
     
     df = None
 
@@ -169,7 +195,7 @@ def main():
         st.write(df.head())  # Mostrar las primeras filas del DataFrame
 
         # Generar y mostrar las recomendaciones de visualización de OpenAI
-        st.subheader("iA Recommended Visualizations")
+        st.subheader("Ai Recommended Visualizations")
         try:
             recommendation = get_openai_recommendation(df)
             st.markdown(recommendation)  # Muestra las recomendaciones de GPT-4
@@ -181,9 +207,9 @@ def main():
             "Select chart type",
             [
                 "Scatter Plot", "Bar Chart", "Stacked Bar Chart", 
-                "Histogram","Line Chart", "Area Chart",  "Boxplot", "Pie chart",
+                "Histogram","Line Chart", "Area Chart", "Boxplot", "Pie chart",
                 "3D Scatter Plot",  "Violin plot", "Heat map",
-                "Geospatial scatter map", "Choropleth map", "Sun diagram"
+                "Geospatial scatter map", "Choropleth map", "Sun diagram", "Time Series Plot", "Treemap"
             ]
         )
 
